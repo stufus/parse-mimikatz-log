@@ -63,37 +63,70 @@ def insert_into_db(sql,current):
     return
 
 def create_db(filename):
-    if filename == '':
+    
+    build = False
+    if filename == None:
+        # If the filename was not specified, create a new file with a temporary name
+        # and build the schema.
         db_file = tempfile.NamedTemporaryFile(delete=False)
         db_filename = db_file.name+'.'+time.strftime('%Y%m%d%H%M%S')+'.mimikatz.db'
         db_file.close()
+        build = True
     else:
+        # The name was provided. 
         db_filename = filename
+        if not os.path.isfile(db_filename):
+            # If the name does not exist, rebuild the schema
+            build = True
 
-    sql = sqlite3.connect(filename)
-    build_db_schema(sql)
-    return sql
+    sql = sqlite3.connect(db_filename)
+
+    if build == True:
+        build_db_schema(sql)
+
+    return sql, db_filename
+
+def display_totals(sql):
+    c = sql.cursor()
+    c.execute("select count(*) from creds")
+    print "        Sets of credentials: "+str(c.fetchone()[0])
+    c.execute("select count(distinct username) from view_usercreds")
+    print "    Unique 'user' usernames: "+str(c.fetchone()[0])
+    c.execute("select count(distinct password) from view_usercreds")
+    print "    Unique 'user' passwords: "+str(c.fetchone()[0])
+    return
 
 if __name__ == '__main__':
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--database', action='store', help='The location of the SQLite database. If this is not specified, a new one will be created. If it is specified and the file exists, it will be opened and used. If a name is specified that does not exist, it will be created.')
-    parser.add_argument('--input', action='store', help='The mimikatz log file to read. If not specified, STDIN will be used.')
-    args = parser.parse_args()
+    parser = argparse.ArgumentParser(description='Basic parser for mimikatz \'logonPasswords\' log files.')
+    parser.add_argument('-d', '--database', action='store', help='The location of the SQLite database. If this is not specified, a new one will be created. If it is specified and the file exists, it will be opened and used. If a name is specified that does not exist, it will be created.')
+    parser.add_argument('-i', '--input', action='store', required=True, help='The mimikatz log file to read. Specify \'-\' to read from STDIN.')
+    args = vars(parser.parse_args())
     
-    if 'database' in args:
-        if os.path.isfile(args['database']:
-            sql, db_filename = sqlite3.connect(args['database'])
-            sys.stdout.write("Opening database: "+db_filename+"\n")
+    if 'database' in args and args['database'] != None:
+        if os.path.isfile(args['database']):
+            sql = sqlite3.connect(args['database'])
+            sys.stdout.write("Opening database: "+args['database']+"\n")
         else:
-            sys.stdout.write("New database created: "+db_filename+"\n")
             sql, db_filename = create_db(args['database'])
+            sys.stdout.write("New database created: "+db_filename+"\n")
     else:
+        sql, db_filename = create_db(None)
         sys.stdout.write("No database file specified; new database created: "+db_filename+"\n")
-        sql, db_filename = create_db(args['database'])
 
-    lines = sys.stdin.readlines()
-    process_input(lines)
+    if 'input' in args and args['input'] != None and os.path.isfile(args['input']):
+        sys.stdout.write("Reading from: "+args['input']+"\n")
+        f = open(args['input'], 'r')
+        lines = f.readlines()
+        f.close()
+    elif args['input'] == '-':
+        sys.stdout.write("Reading from STDIN")
+        lines = sys.stdin.readlines()
+
+    sys.stdout.write("\n")
+    process_input(sql,lines)
+    sys.stdout.write("\n\n")
     
+    display_totals(sql)
     sql.close()
     sys.exit(0)
