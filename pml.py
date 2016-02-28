@@ -62,6 +62,21 @@ def insert_into_db(sql,current):
     sql.commit()
     return
 
+def banner():
+    sys.stdout.write("\n")
+    sys.stdout.write("       .mMMMMMm.             MMm    M   WW   W   WW   RRRRR\n")
+    sys.stdout.write("      mMMMMMMMMMMM.           MM   MM    W   W   W    R   R\n")
+    sys.stdout.write("     /MMMM-    -MM.           MM   MM    W   W   W    R   R\n")
+    sys.stdout.write("    /MMM.    _  \/  ^         M M M M     W W W W     RRRR\n")
+    sys.stdout.write("    |M.    aRRr    /W|        M M M M     W W W W     R  R\n")
+    sys.stdout.write("    \/  .. ^^^   wWWW|        M  M  M      W   W      R   R\n")
+    sys.stdout.write("       /WW\.  .wWWWW/         M  M  M      W   W      R    R\n")
+    sys.stdout.write("       |WWWWWWWWWWW/\n")
+    sys.stdout.write("         .WWWWWW.           Quick & Dirty Mimikatz Log Parser\n")
+    sys.stdout.write("                        stuart.morgan@mwrinfosecurity.com | @ukstufus\n")
+    sys.stdout.write("\n")
+    sys.stdout.flush()
+
 def create_db(filename):
     
     build = False
@@ -98,6 +113,7 @@ def display_totals(sql):
 
 if __name__ == '__main__':
 
+    banner()
     parser = argparse.ArgumentParser(description='Basic parser for mimikatz \'logonPasswords\' log files.')
     parser.add_argument('-d', '--database', action='store', help='The location of the SQLite database. If this is not specified, a new one will be created. If it is specified and the file exists, it will be opened and used. If a name is specified that does not exist, it will be created.')
     parser.add_argument('-i', '--input', action='store', required=True, help='The mimikatz log file to read. Specify \'-\' to read from STDIN.')
