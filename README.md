@@ -8,18 +8,7 @@ This started out as a quick and dirty tool to parse and organise large amounts o
 *     Password :
 ```
 
-Sometimes mimikatz will generate a huge amount of output; the classic example is running ```sekurlsa::logonpasswords``` on a lsass process dump from an Exchange server. Although there are a few tools to parse this, I wanted something that I could just ```cat`` or pipe in all files in any order and expect it to parse them, ignore any malformed output and generate the results in a number of formats, summarised below.
-
-## Cleartext passwords
-
-* SQLite database
-* CSV file
-* Username/password pairs separated by spaces (for metasploit's USERPASS_FILE option)
-* Username/password pairs separated by colons
-
-## Hashes
-
-* JTR style file
+Sometimes mimikatz will generate a huge amount of output; the classic example is running ```sekurlsa::logonpasswords``` on a lsass process dump from an Exchange server. Although there are a few tools to parse this, I wanted something that I could just ```cat`` or pipe in all files in any order and expect it to parse them, ignore any malformed output and offer enough flexibility to allow the credentials to be presented in different forms.
 
 # Compatibility
 
